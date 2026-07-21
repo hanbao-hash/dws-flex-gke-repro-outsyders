@@ -1,0 +1,23 @@
+# Merge this `workloads.instanceTypes.additional` block into the operator-values.yaml that
+# `anyscale cloud setup` generated for YOUR cloud, then `helm upgrade` (step 4 in README).
+# Registers an L4 GPU instance type. The cloud.google.com/gke-queued toleration is REQUIRED
+# so the worker pod can land on a DWS flex node.
+workloads:
+  instanceTypes:
+    additional:
+      8CPU-32GB-1xL4:
+        resources:
+          CPU: 6
+          GPU: 1
+          memory: 24Gi
+          accelerators:
+            - L4
+        nodeSelector:
+          cloud.google.com/gke-accelerator: nvidia-l4
+        tolerations:
+          - key: "nvidia.com/gpu"
+            operator: "Exists"
+            effect: "NoSchedule"
+          - key: "cloud.google.com/gke-queued"
+            operator: "Exists"
+            effect: "NoSchedule"

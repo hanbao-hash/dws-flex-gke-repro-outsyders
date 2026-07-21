@@ -1,0 +1,19 @@
+# Anyscale compute config for a DWS flex-start GPU worker group.
+# The kueue.x-k8s.io/queue-name label is what routes this group through Kueue -> DWS.
+# Set `cloud` to your Anyscale GKE cloud name before creating.
+cloud: gke-flex-us-central1
+head_node:
+  instance_type: 2CPU-8GB
+worker_nodes:
+  - name: gpu-workers
+    instance_type: 8CPU-32GB-1xL4
+    min_nodes: 1            # raise to N for an all-at-once gang (with --enable-queued-provisioning)
+    max_nodes: 1
+    advanced_instance_config:
+      metadata:
+        labels:
+          kueue.x-k8s.io/queue-name: user-queue
+flags:
+  # DWS queues up to ~2h (the flex max wait), so lift the 25-min default startup cap to 2h
+  # — otherwise a long queue fails the job/workspace (a negative value disables it).
+  workload_starting_timeout: 2h

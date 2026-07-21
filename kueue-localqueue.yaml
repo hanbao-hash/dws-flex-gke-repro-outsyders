@@ -1,0 +1,9 @@
+# LocalQueue MUST live in the namespace where Anyscale launches Ray pods
+# (the operator's workload namespace — default `anyscale-operator`). Adjust if yours differs.
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: LocalQueue
+metadata:
+  name: user-queue
+  namespace: anyscale-operator
+spec:
+  clusterQueue: dws-cluster-queue

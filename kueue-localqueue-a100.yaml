@@ -1,0 +1,9 @@
+# LocalQueue for A100 flex-start jobs. Use kueue.x-k8s.io/queue-name: user-queue-a100
+# on worker pods (see compute-config-a100.yaml).
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: LocalQueue
+metadata:
+  name: user-queue-a100
+  namespace: anyscale-operator
+spec:
+  clusterQueue: dws-cluster-queue-a100

@@ -1,5 +1,5 @@
 # Kueue DWS flex-start config (cluster-scoped). Apply AFTER Kueue is installed.
-# Wires the GKE queued-provisioning (DWS) admission check onto the dws-l4 flavor.
+# Wires the GKE queued-provisioning (DWS) admission check onto dws-l4 and dws-a100 flavors.
 apiVersion: kueue.x-k8s.io/v1beta1
 kind: ResourceFlavor
 metadata:
@@ -9,6 +9,18 @@ spec:
     cloud.google.com/gke-nodepool: dws-l4-flex   # MUST equal your DWS node pool name
   tolerations:
     - key: cloud.google.com/gke-queued            # DWS nodes carry this taint; tolerate it
+      operator: Exists
+      effect: NoSchedule
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ResourceFlavor
+metadata:
+  name: dws-a100
+spec:
+  nodeLabels:
+    cloud.google.com/gke-nodepool: dws-a100-flex   # MUST equal your A100 DWS node pool name
+  tolerations:
+    - key: cloud.google.com/gke-queued
       operator: Exists
       effect: NoSchedule
 ---
@@ -48,10 +60,34 @@ spec:
             - name: "memory"
               nominalQuota: 100000Gi
             - name: "nvidia.com/gpu"
-              nominalQuota: 32          # set to your GPU quota
+              nominalQuota: 32          # L4 pool total-max-nodes: 8 x 1 GPU
             - name: "ephemeral-storage"
               nominalQuota: 100000Gi
   admissionChecksStrategy:
     admissionChecks:
       - name: dws-prov
         onFlavors: [dws-l4]
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ClusterQueue
+metadata:
+  name: dws-cluster-queue-a100
+spec:
+  namespaceSelector: {}
+  resourceGroups:
+    - coveredResources: ["cpu", "memory", "nvidia.com/gpu", "ephemeral-storage"]
+      flavors:
+        - name: dws-a100
+          resources:
+            - name: "cpu"
+              nominalQuota: 10000
+            - name: "memory"
+              nominalQuota: 100000Gi
+            - name: "nvidia.com/gpu"
+              nominalQuota: 4           # A100 pool total-max-nodes: 4 x 1 GPU (a2-ultragpu-1g)
+            - name: "ephemeral-storage"
+              nominalQuota: 100000Gi
+  admissionChecksStrategy:
+    admissionChecks:
+      - name: dws-prov
+        onFlavors: [dws-a100]

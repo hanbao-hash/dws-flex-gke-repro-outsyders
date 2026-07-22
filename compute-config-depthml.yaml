@@ -1,0 +1,21 @@
+# depthML training on flex-start A100 (Fares pipeline).
+# Repo: github.com/Outsyders/depthML @ investigate_flickering_1
+# Entrypoint: python -m examples.train ...  (override via job submit)
+# Requires /mnt/shared_storage + gs://o-datasets IAM on the flex cluster.
+cloud: gke-flex-us-central1
+head_node:
+  instance_type: 2CPU-8GB
+worker_nodes:
+  - name: gpu-workers
+    instance_type: 12CPU-170GB-1xA100-80G
+    min_nodes: 1
+    max_nodes: 1
+    advanced_instance_config:
+      metadata:
+        labels:
+          kueue.x-k8s.io/queue-name: user-queue-a100
+flags:
+  workload_starting_timeout: 2h
+# Register with container image when creating compute config, e.g.:
+#   anyscale/image/depth_training_4:7
+#   (base anyscale/ray:2.51.1-slim-py312-cu126)

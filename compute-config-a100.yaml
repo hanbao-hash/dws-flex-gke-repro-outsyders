@@ -1,0 +1,17 @@
+# Anyscale compute config for a DWS flex-start A100 80GB worker (a2-ultragpu-1g).
+# Same Kueue LocalQueue (user-queue) as L4; routes through dws-a100 flavor via operator.
+# Set `cloud` to your Anyscale GKE cloud name before creating.
+cloud: gke-flex-us-central1
+head_node:
+  instance_type: 2CPU-8GB
+worker_nodes:
+  - name: gpu-workers
+    instance_type: 12CPU-170GB-1xA100-80G
+    min_nodes: 1
+    max_nodes: 1
+    advanced_instance_config:
+      metadata:
+        labels:
+          kueue.x-k8s.io/queue-name: user-queue-a100
+flags:
+  workload_starting_timeout: 2h

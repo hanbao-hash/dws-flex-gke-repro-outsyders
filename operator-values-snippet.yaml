@@ -30,7 +30,7 @@ workloads:
           accelerators:
             - A100-80G
         nodeSelector:
-          cloud.google.com/gke-accelerator: nvidia-tesla-a100
+          cloud.google.com/gke-accelerator: nvidia-a100-80gb
         tolerations:
           - key: "nvidia.com/gpu"
             operator: "Exists"
